@@ -14,35 +14,35 @@ namespace WordMatch
 
         public static Constrain GetConstrain(string original, string sample)
         {
-            var dogs = original.Where((t, i) => t == sample[i]).Count();
+            var bulls = original.Where((t, i) => t == sample[i]).Count();
             var letters = new List<char>();
-            int cats = 0;
+            int cows = 0;
             for (int j = 0; j < original.Count(); j++)
                 if (sample[j] != original[j])
                     letters.Add(original[j]);
             for (int i = 0; i < sample.Length; i++)
             {
                 if (original[i] != sample[i] && letters.Contains(sample[i]))
-                {//if not dog and present
+                {//if not bull and present
                     letters.Remove(sample[i]);//remove first occurence
-                    cats++;
+                    cows++;
                 }
             }
             //int c = original.Select((t1, i) => original.Where((t, j) => t1 == sample[j] && i != j).Count()).Sum();
-            return new Constrain() { Sample = sample, Dogs = dogs, Cats = cats };
+            return new Constrain() { Sample = sample, Bulls = bulls, Cows = cows };
         }
 
         public class Constrain
         {
-            public int Cats { get; set; }
-            public int Dogs { get; set; }
+            public int Cows { get; set; }
+            public int Bulls { get; set; }
             public string Sample { get; set; }
             public bool CheckConstrain(string test)
             {
                 if (test.Length != Sample.Length)
                     return false;
                 var cons = GetConstrain(test, Sample);
-                return this.Dogs == cons.Dogs && this.Cats == cons.Cats;
+                return this.Bulls == cons.Bulls && this.Cows == cons.Cows;
             }
         }
 
@@ -79,10 +79,10 @@ namespace WordMatch
                 if (restrictions.Select(x => x.Sample).Contains(next))
                     continue;
                 var maxMetric = 0;
-                for (int dog = 0; dog <= next.Length; dog++)
-                    for (int cat = 0; cat <= next.Length - dog; cat++)
+                for (int bull = 0; bull <= next.Length; bull++)
+                    for (int cow = 0; cow <= next.Length - bull; cow++)
                     {
-                        var cons = new Constrain() { Sample = next, Dogs = dog, Cats = cat };
+                        var cons = new Constrain() { Sample = next, Bulls = bull, Cows = cow };
                         var temp = restrictions.ToList();
                         temp.Add(cons);
                         var variants = GetWords(temp);
@@ -118,12 +118,12 @@ namespace WordMatch
                 Console.WriteLine("My guess is:" + version);
                 var cons = new Constrain() { Sample = version };
                 Console.Write("Enter how many bulls(green, letters on right place):");
-                cons.Dogs = System.Convert.ToInt16(Console.ReadLine());
-                if (cons.Dogs == version.Length)
+                cons.Bulls = System.Convert.ToInt16(Console.ReadLine());
+                if (cons.Bulls == version.Length)
                     break;
                 Console.Write("Enter how many cows(yellow, letters on other place):");
-                cons.Cats = System.Convert.ToInt16(Console.ReadLine());
-                Console.WriteLine("Version:" + version + "; green/yellow:" + cons.Dogs + "/" + cons.Cats);
+                cons.Cows = System.Convert.ToInt16(Console.ReadLine());
+                Console.WriteLine("Version:" + version + "; green/yellow:" + cons.Bulls + "/" + cons.Cows);
                 restrictions.Add(cons);
                 version = Guess(restrictions);
             } while (!string.IsNullOrEmpty(version));
@@ -149,7 +149,7 @@ namespace WordMatch
             do
             {
                 var cons = GetConstrain(word, version);
-                Console.WriteLine("Version:" + version + "; green/yellow:" + cons.Dogs + "/" + cons.Cats);
+                Console.WriteLine("Version:" + version + "; green/yellow:" + cons.Bulls + "/" + cons.Cows);
                 restrictions.Add(cons);
                 version = Guess(restrictions);
             } while (!string.IsNullOrEmpty(version) && version != word);
@@ -177,7 +177,7 @@ namespace WordMatch
                 do
                 {
                     var cons = GetConstrain(word, version);
-                    Console.WriteLine("Version:" + version + "; Dogs/Cats:" + cons.Dogs + "/" + cons.Cats);
+                    Console.WriteLine("Version:" + version + "; Bulls/Cows:" + cons.Bulls + "/" + cons.Cows);
                     restrictions.Add(cons);
                     version = Guess(restrictions);
                 } while (!string.IsNullOrEmpty(version) && version != word);
