@@ -46,10 +46,10 @@ namespace WordMatch
             }
         }
 
-        public static List<string> GetWords(List<Constrain> restrictions)
-        {
-            return words.Where(w => restrictions.TrueForAll(constrain => constrain.CheckConstrain(w))).ToList();
-        }
+        private static Func<string,bool> wordIsGood(List<Constrain> restrictions) =>
+            word => restrictions.TrueForAll(constrain => constrain.CheckConstrain(word));
+        public static List<string> GetWords(List<Constrain> restrictions) => words.Where(wordIsGood(restrictions)).ToList();
+        public static int GetWordsCount(List<Constrain> restrictions) => words.Count(wordIsGood(restrictions));
 
         #endregion
 
@@ -70,7 +70,6 @@ namespace WordMatch
             //minimax
             var min = int.MaxValue;
             var answer = good[0];
-            var answers = new List<string>();
             int counter = 0;
             Console.SetCursorPosition(0, Console.CursorTop);
             foreach (var next in good)
@@ -85,18 +84,16 @@ namespace WordMatch
                         var cons = new Constrain() { Sample = next, Bulls = bull, Cows = cow };
                         var temp = restrictions.ToList();
                         temp.Add(cons);
-                        var variants = GetWords(temp);
-                        maxMetric = Math.Max(maxMetric, variants.Count);
+                        var variantsCount = GetWordsCount(temp);
+                        maxMetric = Math.Max(maxMetric, variantsCount);
+                        if (maxMetric > min) goto skip;//already too big
                     }
                 if (maxMetric < min)
                 {
                     min = maxMetric;
                     answer = next;
-                    //answers.Clear();
-                    //answers.Add(next);
                 }
-                else if (maxMetric == min)
-                    answers.Add(next);
+                skip:
                 counter++;
                 Console.Write((100 * counter / good.Count).ToString() + "%");
                 Console.SetCursorPosition(0, Console.CursorTop);
